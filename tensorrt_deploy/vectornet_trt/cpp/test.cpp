@@ -12,9 +12,9 @@ int main()
 {
     VectorNetOptions options;
     options.engine_path =
-        "/home/zhanghao/code/master/10_PREDICTION/VectorNet/my_vectornet_github/tensorrt_deploy/vectornet_trt/cpp/data/vectornet.engine";
+        "/media/zetlin/Data2/Code/vectornet/tnt_vectornet_with_tensorrt/tensorrt_deploy/vectornet_trt/cpp/vectornet.engine";
     options.weights_path =
-        "/home/zhanghao/code/master/10_PREDICTION/VectorNet/my_vectornet_github/tensorrt_deploy/vectornet_trt/cpp/data/vectornet.wts";
+        "/media/zetlin/Data2/Code/vectornet/tnt_vectornet_with_tensorrt/tensorrt_deploy/vectornet_trt/cpp/vectornet.wts";
     options.ues_fp16 = false;
 
     TrajfeatureInputData input_data;

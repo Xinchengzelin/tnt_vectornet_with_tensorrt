@@ -13,6 +13,9 @@ import pickle
 import torch.nn as nn
 from tqdm import tqdm
 import torch.nn.functional as F
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),"../../")))
 
 from model.layers.mlp import MLP
 from model.layers.subgraph import SubGraph
@@ -61,12 +64,12 @@ class VectorNetExport(nn.Module):
         """
         # valid_len = traj_num + lane_num
         sub_graph_out = self.subgraph(x, cluster)
-        # print("sub_graph_out: \n", sub_graph_out, "\n\n\n")
+        # print("sub_graph_out: \n", sub_graph_out.shape, "\n\n\n")
 
         x = torch.cat([sub_graph_out, id_embedding], dim=1).unsqueeze(0)
         global_feat = self.global_graph(x, valid_lens=None)
 
-        # print("global_feat[:, 0]: \n", global_feat[:, 0], "\n")
+        # print("global_feat: \n", global_feat.shape, "\n")
         # print("global_feat[:, 0].shape: \n", global_feat.shape, "\n\n")
 
         pred = self.traj_pred_mlp(global_feat[:, 0])
@@ -117,10 +120,11 @@ if __name__ == "__main__":
     SEED = 0
     torch.manual_seed(SEED)
     torch.cuda.manual_seed(SEED)
-    
-    ckpt = "work_dir/vectornet/03_10_20_43/best_VectorNet.pth"
-    wts = "tensorrt_deploy/src/data/vectornet/vectornet.wts"
-    test_pkl = "tensorrt_deploy/src/data/data_seq_40050_features.pkl"
+
+    root_dir = "/media/zetlin/Data2/Code/vectornet/tnt_vectornet_with_tensorrt/"
+    ckpt = root_dir + "weights/sg_best_vectornet.pth"
+    wts = root_dir + "tensorrt_deploy/vectornet_trt/cpp/vectornet.wts"
+    test_pkl = root_dir + "mini_data/val/data_seq_569_features.pkl"
 
     model = load_vectornet(ckpt)
     # for k,v in model.state_dict().items():
@@ -154,11 +158,11 @@ if __name__ == "__main__":
     print(out.reshape(-1,2))
 
     import numpy as np
-    np.savetxt("/home/zhanghao/code/master/6_DEPLOY/vectornetx/data/feature.txt", x.reshape(1,-1).detach().cpu().numpy(), delimiter=",")
-    np.savetxt("/home/zhanghao/code/master/6_DEPLOY/vectornetx/data/cluster.txt", cluster.reshape(1,-1).detach().cpu().numpy(), delimiter=",")
-    np.savetxt("/home/zhanghao/code/master/6_DEPLOY/vectornetx/data/id_embedding.txt", id_embedding.reshape(1,-1).detach().cpu().numpy(), delimiter=",")
-    np.savetxt("/home/zhanghao/code/master/6_DEPLOY/vectornetx/data/cluster_count.txt", cluster_count.reshape(1,-1).detach().cpu().numpy(), delimiter=",")
-    np.savetxt("/home/zhanghao/code/master/6_DEPLOY/vectornetx/data/out.txt", out.reshape(1,-1).detach().cpu().numpy(), delimiter=",")
+    np.savetxt(root_dir + "tensorrt_deploy/vectornet_trt/cpp/data/feature.txt", x.reshape(1,-1).detach().cpu().numpy(), delimiter=",")
+    np.savetxt(root_dir + "tensorrt_deploy/vectornet_trt/cpp/data/cluster.txt", cluster.reshape(1,-1).detach().cpu().numpy(), delimiter=",")
+    np.savetxt(root_dir + "tensorrt_deploy/vectornet_trt/cpp/data/id_embedding.txt", id_embedding.reshape(1,-1).detach().cpu().numpy(), delimiter=",")
+    np.savetxt(root_dir + "tensorrt_deploy/vectornet_trt/cpp/data/cluster_count.txt", cluster_count.reshape(1,-1).detach().cpu().numpy(), delimiter=",")
+    np.savetxt(root_dir + "tensorrt_deploy/vectornet_trt/cpp/data/out.txt", out.reshape(1,-1).detach().cpu().numpy(), delimiter=",")
 
     # gt = test_data["y"].reshape(30, 2).cumsum(0)
     # # print(gt)

@@ -106,3 +106,11 @@ VectorNet speed:
 ~~c. Excute~~
 
 > ~~./vectornet ../../models/traced_vectornet.pt~~
+
+
+
+# 输入
+- agent: [xt,yt,xt-x(t-1),yt-y(t-1),step, id] step： 一个6维feature 加1
+- 地图：[] 差不多的信息
+- MLP有个shortcut
+- 使用torch_scatter的scatter，然后用plugin实现scatter_max

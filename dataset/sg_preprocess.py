@@ -128,14 +128,14 @@ class SGPreprocessor:
         traj_obs = interm_data['feats'][0]
         traj_fut = interm_data['gt_preds'][0]
         offset_fut = np.vstack([traj_fut[0, :] - traj_obs[-1, :2], traj_fut[1:, :] - traj_fut[:-1, :]])
-        train_data["y"] = torch.from_numpy(offset_fut.reshape(-1).astype(np.float32)).float()
+        train_data["y"] = torch.from_numpy(offset_fut.reshape(-1).astype(np.float32)).float() # offset_fut
 
         # get x
         feats = np.empty((0, 6))
         identifier = np.empty((0, 2))
 
-        traj_feats = interm_data['feats']
-        traj_has_obss = interm_data['has_obss']
+        traj_feats = interm_data['feats'] # 30*N 障碍物信息（x,y,1.0）
+        traj_has_obss = interm_data['has_obss'] # mask： 是否有轨迹信息
         step = np.arange(0, traj_feats.shape[1]).reshape((-1, 1))
         traj_cnt = 0
         for _, [feat, has_obs] in enumerate(zip(traj_feats, traj_has_obss)):
@@ -148,9 +148,9 @@ class SGPreprocessor:
         # get lane features
         graph = interm_data['graph']
         if len(graph['lane_idcs']) > 0:
-            ctrs = graph['ctrs']
-            vec = graph['feats']
-            lane_idcs = graph['lane_idcs'].reshape(-1, 1) + traj_cnt
+            ctrs = graph['ctrs'] # num_nodes*2, 车道线相邻点的中点集合
+            vec = graph['feats'] # num_nodes*2, 车道线相邻点的vector集合
+            lane_idcs = graph['lane_idcs'].reshape(-1, 1) + traj_cnt # num_nodes 每个点所属车道线index
             steps = np.zeros((len(lane_idcs), 1))
             feats = np.vstack([feats, np.hstack([ctrs, vec, steps, lane_idcs])])
         
@@ -160,7 +160,7 @@ class SGPreprocessor:
             identifier = np.vstack([identifier, np.min(feats[indices, :2], axis=0)])
         
         train_data["x"] = torch.from_numpy(feats).float()
-        train_data["cluster"] = torch.from_numpy(cluster).short()
+        train_data["cluster"] = torch.from_numpy(cluster).short() #id
         train_data["identifier"] = torch.from_numpy(identifier).float()
 
         return train_data

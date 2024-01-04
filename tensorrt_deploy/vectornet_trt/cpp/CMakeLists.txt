@@ -4,8 +4,13 @@ project(vectornet_test)
 set(CMAKE_CXX_STANDARD 14)
 
 # find tensorrt
-find_library(NVINFER NAMES nvinfer)
-message("NVINFER: ${NVINFER}")
+# find_library(NVINFER NAMES nvinfer)
+# message("NVINFER: ${NVINFER}")
+set(TENSOR_RT_ROOT "/home/zetlin/third_party/TensorRT-8.4.1.5")
+include_directories(${TENSOR_RT_ROOT}/include)
+File(GLOB TENSOR_RT_LIBRARIES ${TENSOR_RT_ROOT}/lib/*.so)
+message("TensorRT: ${TENSOR_RT_LIBRARIES}")
+
 
 # find CUDA
 find_package(CUDA)
@@ -34,9 +39,9 @@ include_directories(
 file(GLOB_RECURSE PLUGIN_SOURCES ${PROJECT_SOURCE_DIR}/Plugin/*.cpp)
 file(GLOB_RECURSE PLUGIN_CU_SOURCES ${PROJECT_SOURCE_DIR}/Plugin/*.cu)
 cuda_add_library(mytrt_plugin SHARED ${PLUGIN_CU_SOURCES} ${PLUGIN_SOURCES})
-target_link_libraries(mytrt_plugin nvinfer)
+target_link_libraries(mytrt_plugin ${TENSOR_RT_LIBRARIES})
 
 add_executable(test_vectornet test.cpp vectornet.cpp)
 
-target_link_libraries(test_vectornet ${CUDA_LIBRARIES} nvinfer mytrt_plugin)
+target_link_libraries(test_vectornet ${CUDA_LIBRARIES} ${TENSOR_RT_LIBRARIES} mytrt_plugin)
 add_definitions(-O2 -pthread)
